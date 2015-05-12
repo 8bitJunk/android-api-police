@@ -2,6 +2,7 @@ package com.alacityfoundation.statistick;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -37,7 +38,6 @@ import java.util.ArrayList;
  */
 public class MainActivityFragment extends Fragment {
     private ArrayList<Force> forces = new ArrayList<>();
-    private ArrayList<Crime> crimes = new ArrayList<>();
     private final ArrayList<String> months = new ArrayList<String>() {{
         add("January");
         add("February");
@@ -58,6 +58,8 @@ public class MainActivityFragment extends Fragment {
         }
     }};
     private Force selectedForce = null;
+    private String selectedMonth = null;
+    private String selectedYear = null;
 
     public MainActivityFragment() {
     }
@@ -65,7 +67,7 @@ public class MainActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // perform web request to get list of all police forces
-        new RequestTask(new Force()).execute("https://data.police.uk/api/forces");
+        new RequestTask().execute("https://data.police.uk/api/forces");
 
         // return inflated view
         return inflater.inflate(R.layout.fragment_main, container, false);
@@ -73,7 +75,11 @@ public class MainActivityFragment extends Fragment {
 
     // called on button press
     public void getCrime(View view) {
-        
+        Intent intent = new Intent(getActivity(), listActivity.class);
+        String forceId = this.selectedForce.getId();
+        String date = this.selectedYear + "-" + this.selectedMonth;
+        intent.putExtra("requestUrl", "https://data.police.uk/api/crimes-no-location?category=all-crime&force=" + forceId + "&date=" + date);
+        startActivity(intent);
     }
 
     private void populateSpinners() {
@@ -105,77 +111,90 @@ public class MainActivityFragment extends Fragment {
 
         yearSpinner.setAdapter(yearAdapter);
         monthSpinner.setAdapter(monthAdapter);
+
+        monthSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+                // set the selectedForce to be the force chosen in the spinner
+                Log.d("SELECTED MONTH", (String) adapter.getItem(position));
+                String monthValue;
+                switch ((String) adapter.getItem(position)) {
+                    case "January":
+                        monthValue = "01";
+                        break;
+                    case "February":
+                        monthValue = "02";
+                        break;
+                    case "March":
+                        monthValue = "03";
+                        break;
+                    case "April":
+                        monthValue = "04";
+                        break;
+                    case "May":
+                        monthValue = "05";
+                        break;
+                    case "June":
+                        monthValue = "06";
+                        break;
+                    case "July":
+                        monthValue = "07";
+                        break;
+                    case "August":
+                        monthValue = "08";
+                        break;
+                    case "September":
+                        monthValue = "09";
+                        break;
+                    case "October":
+                        monthValue = "10";
+                        break;
+                    case "November":
+                        monthValue = "11";
+                        break;
+                    case "December":
+                        monthValue = "12";
+                        break;
+                    default:
+                        monthValue = "01";
+                        break;
+                }
+                selectedMonth = monthValue;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapter) {
+            }
+        });
+
+        yearSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+                selectedYear = (String) adapter.getItem(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
     }
 
     // inner class for dealing with the getting and deserialising of crime and force objects from API
     public class RequestTask extends AsyncTask<String, Void, String> {
-        private Object returnObjectType;
-
-        /**
-         * Creates a new instance of the RequestTask object.
-         * @param obj the type of object we expect to get back as represented by JSON
-         */
-        public RequestTask(Object obj) {
-            this.returnObjectType = obj;
-        }
-
-        public RequestTask() {
-            super();
-        }
-
         @Override
         protected String doInBackground(String... urls) {
             // params comes from the execute() call: params[0] is the url.
             String result = "";
             try {
-                result = this.downloadUrl(urls[0]);
+                result = new UrlDownloader().downloadUrl(urls[0]);
             } catch (IOException e) {
                 Log.d("OH DEAR", "Something went wrong");
                 e.printStackTrace();
             }
             return result;
-        }
-
-        private String downloadUrl(String myurl) throws IOException {
-            InputStream is = null;
-
-            try {
-                URL url = new URL(myurl);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(10000 /* milliseconds */);
-                conn.setConnectTimeout(15000 /* milliseconds */);
-                conn.setRequestMethod("GET");
-                conn.setDoInput(true);
-                // Starts the query
-                conn.connect();
-                int response = conn.getResponseCode();
-                Log.d("DEBUG", "The response is: " + response);
-                is = conn.getInputStream();
-
-                // Convert the InputStream into a string
-                String contentAsString = this.readIt(is);
-                return contentAsString;
-
-                // Makes sure that the InputStream is closed after the app is
-                // finished using it
-            } finally {
-                if (is != null) {
-                    is.close();
-                }
-            }
-        }
-
-        // read HTTP response and return as string
-        private String readIt(InputStream stream) throws IOException, UnsupportedEncodingException {
-            BufferedReader in = new BufferedReader(new InputStreamReader(stream));
-            String line = null;
-
-            StringBuilder responseData = new StringBuilder();
-            while((line = in.readLine()) != null) {
-                responseData.append(line);
-            }
-            in.close();
-            return responseData.toString();
         }
 
         @Override
@@ -186,13 +205,8 @@ public class MainActivityFragment extends Fragment {
                 JSONArray jsonResult = new JSONArray(result);
                 for(int i = 0; i < jsonResult.length(); i++) {
                     // for all results in array, deserialise into returnObjectType objects
-                    Object resultObject = this.decodeJson(this.returnObjectType.getClass(), jsonResult.getString(i));
-                    // and add to appropriate instance variables depending on class
-                    if(this.returnObjectType instanceof Force) {
-                        forces.add((Force) resultObject);
-                    } else if (this.returnObjectType instanceof Crime) {
-                        crimes.add((Crime) resultObject);
-                    }
+                    Force resultObject = this.decodeJson(Force.class, jsonResult.getString(i));
+                    forces.add(resultObject);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
