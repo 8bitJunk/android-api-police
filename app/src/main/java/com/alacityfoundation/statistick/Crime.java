@@ -7,12 +7,10 @@ package com.alacityfoundation.statistick;
  */
 public class Crime extends Model {
     private String category;
-    private String location_type;
-    private String context;
+    private String location;
     private String outcome_status;
     private String persistent_id;
     private String id;
-    private String location_subtype;
     private String month;
 
     public String getCategory() {
@@ -23,20 +21,12 @@ public class Crime extends Model {
         this.category = category;
     }
 
-    public String getLocation_type() {
-        return location_type;
+    public String getLocation() {
+        return location;
     }
 
-    public void setLocation_type(String location_type) {
-        this.location_type = location_type;
-    }
-
-    public String getContext() {
-        return context;
-    }
-
-    public void setContext(String context) {
-        this.context = context;
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     public String getOutcome_status() {
@@ -61,14 +51,6 @@ public class Crime extends Model {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getLocation_subtype() {
-        return location_subtype;
-    }
-
-    public void setLocation_subtype(String location_subtype) {
-        this.location_subtype = location_subtype;
     }
 
     public String getMonth() {

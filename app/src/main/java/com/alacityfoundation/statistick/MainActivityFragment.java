@@ -82,6 +82,7 @@ public class MainActivityFragment extends Fragment {
         String forceId = this.selectedForce.getId();
         String date = this.selectedYear + "-" + this.selectedMonth;
         intent.putExtra("requestUrl", "https://data.police.uk/api/crimes-no-location?category=all-crime&force=" + forceId + "&date=" + date);
+        intent.putExtra("forceName", selectedForce.getName());
         startActivity(intent);
     }
 

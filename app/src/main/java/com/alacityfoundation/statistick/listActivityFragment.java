@@ -1,12 +1,14 @@
 package com.alacityfoundation.statistick;
 
 import android.app.Fragment;
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 import com.google.gson.Gson;
 
@@ -23,10 +25,13 @@ import java.util.ArrayList;
  */
 public class listActivityFragment extends Fragment {
     private ArrayList<Crime> crimes = new ArrayList<>();
+    private ProgressDialog progressDialog;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         String url = this.getActivity().getIntent().getStringExtra("requestUrl");
+        this.getActivity().getActionBar().setTitle(this.getActivity().getIntent().getStringExtra("forceName"));
         Log.d("URL", url);
+        progressDialog = ProgressDialog.show(this.getActivity(), "Retrieving Data", "Please Wait");
         new RequestTask().execute(url);
 
         return inflater.inflate(R.layout.fragment_list, container, false);
@@ -56,7 +61,23 @@ public class listActivityFragment extends Fragment {
                     // for all results in array, deserialise into crime objects
                     JSONObject arrayObject = jsonResult.getJSONObject(i);
                     Crime crime = new Crime();
-                    crime.setId(arrayObject.getString("persistent_id"));
+                    crime.setPersistent_id(arrayObject.getString("persistent_id"));
+                    crime.setPersistent_id(arrayObject.getString("id"));
+                    crime.setCategory(arrayObject.getString("category"));
+                    crime.setMonth(arrayObject.getString("month"));
+                    // sort out possible nulls
+                    if(arrayObject.isNull("location")) {
+                        crime.setLocation("No information available");
+                    } else {
+                        crime.setLocation(arrayObject.getString("location"));
+                    }
+
+                    if(arrayObject.isNull("outcome_status")) {
+                        crime.setOutcome_status("No information available");
+                    } else {
+                        crime.setOutcome_status(arrayObject.getJSONObject("outcome_status").getString("category"));
+                    }
+
                     crimes.add(crime);
                 }
             } catch (JSONException e) {
@@ -74,6 +95,9 @@ public class listActivityFragment extends Fragment {
     }
 
     private void populateList() {
-        Log.d("CRIMES FOUND", this.crimes.toString());
+        final listAdapter adapter = new listAdapter(this.getActivity(), R.layout.crime_list, crimes.toArray());
+        ListView crimeList = (ListView) this.getActivity().findViewById(R.id.crimeList);
+        crimeList.setAdapter(adapter);
+        progressDialog.dismiss();
     }
 }
