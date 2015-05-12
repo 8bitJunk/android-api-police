@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -30,7 +31,10 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 
 /**
@@ -57,20 +61,29 @@ public class MainActivityFragment extends Fragment {
             add(i);
         }
     }};
-    private Force selectedForce = null;
-    private String selectedMonth = null;
-    private String selectedYear = null;
+    private Force selectedForce;
+    private String selectedMonth;
+    private String selectedYear;
 
     public MainActivityFragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_main, container, false);
+        Button button = (Button) view.findViewById(R.id.goButton);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getCrime(view);
+            }
+        });
+
         // perform web request to get list of all police forces
         new RequestTask().execute("https://data.police.uk/api/forces");
 
         // return inflated view
-        return inflater.inflate(R.layout.fragment_main, container, false);
+        return view;
     }
 
     // called on button press
@@ -94,7 +107,7 @@ public class MainActivityFragment extends Fragment {
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
                 // set the selectedForce to be the force chosen in the spinner
                 selectedForce = (Force) adapter.getItem(position);
-                Log.d("SELECTED FORCE", selectedForce.getName());
+                Log.d("FORCE", selectedForce.getName());
             }
 
             @Override
@@ -106,8 +119,8 @@ public class MainActivityFragment extends Fragment {
         Spinner yearSpinner = (Spinner) this.getActivity().findViewById(R.id.yearSpinner);
         Spinner monthSpinner = (Spinner) this.getActivity().findViewById(R.id.monthSpinner);
 
-        ArrayAdapter<String> yearAdapter = new ArrayAdapter(this.getActivity().getBaseContext(), android.R.layout.simple_spinner_item, this.years);
-        ArrayAdapter<String> monthAdapter = new ArrayAdapter(this.getActivity().getBaseContext(), android.R.layout.simple_spinner_item, this.months);
+        final ArrayAdapter<String> yearAdapter = new ArrayAdapter(this.getActivity().getBaseContext(), android.R.layout.simple_spinner_item, this.years);
+        final ArrayAdapter<String> monthAdapter = new ArrayAdapter(this.getActivity().getBaseContext(), android.R.layout.simple_spinner_item, this.months);
 
         yearSpinner.setAdapter(yearAdapter);
         monthSpinner.setAdapter(monthAdapter);
@@ -116,51 +129,15 @@ public class MainActivityFragment extends Fragment {
 
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-                // set the selectedForce to be the force chosen in the spinner
-                Log.d("SELECTED MONTH", (String) adapter.getItem(position));
-                String monthValue;
-                switch ((String) adapter.getItem(position)) {
-                    case "January":
-                        monthValue = "01";
-                        break;
-                    case "February":
-                        monthValue = "02";
-                        break;
-                    case "March":
-                        monthValue = "03";
-                        break;
-                    case "April":
-                        monthValue = "04";
-                        break;
-                    case "May":
-                        monthValue = "05";
-                        break;
-                    case "June":
-                        monthValue = "06";
-                        break;
-                    case "July":
-                        monthValue = "07";
-                        break;
-                    case "August":
-                        monthValue = "08";
-                        break;
-                    case "September":
-                        monthValue = "09";
-                        break;
-                    case "October":
-                        monthValue = "10";
-                        break;
-                    case "November":
-                        monthValue = "11";
-                        break;
-                    case "December":
-                        monthValue = "12";
-                        break;
-                    default:
-                        monthValue = "01";
-                        break;
+
+                SimpleDateFormat formatIn = new SimpleDateFormat("MMMM");
+                SimpleDateFormat formatOut = new SimpleDateFormat("MM");
+                try {
+                    selectedMonth = formatOut.format(formatIn.parse(monthAdapter.getItem(position)));
+                } catch (ParseException e) {
+                    e.printStackTrace();
                 }
-                selectedMonth = monthValue;
+                Log.d("MONTH", selectedMonth);
             }
 
             @Override
@@ -172,7 +149,8 @@ public class MainActivityFragment extends Fragment {
 
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-                selectedYear = (String) adapter.getItem(position);
+                selectedYear = String.valueOf(yearAdapter.getItem(position));
+                Log.d("YEAR", selectedYear);
             }
 
             @Override

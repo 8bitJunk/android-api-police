@@ -1,6 +1,7 @@
 package com.alacityfoundation.statistick;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,7 +31,8 @@ public class listActivityFragment extends Fragment {
     private ArrayList<Crime> crimes = new ArrayList<>();
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        new RequestTask().execute();
+        String url = this.getActivity().getIntent().getStringExtra("requestUrl");
+        new RequestTask().execute(url);
 
         return inflater.inflate(R.layout.fragment_list, container, false);
     }
@@ -76,6 +78,6 @@ public class listActivityFragment extends Fragment {
     }
 
     private void populateList() {
-
+        Log.d("CRIMES FOUND", this.crimes.get(0).toString());
     }
 }
