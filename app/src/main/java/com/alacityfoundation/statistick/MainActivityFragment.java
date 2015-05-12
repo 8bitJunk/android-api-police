@@ -1,10 +1,7 @@
 package com.alacityfoundation.statistick;
 
 import android.app.Fragment;
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,31 +12,24 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Array;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Calendar;
+import java.util.Locale;
 
 
 /**
  * A placeholder fragment containing a simple view.
  */
+@SuppressWarnings("unchecked")
 public class MainActivityFragment extends Fragment {
     private ArrayList<Force> forces = new ArrayList<>();
     private final ArrayList<String> months = new ArrayList<String>() {{
@@ -56,17 +46,17 @@ public class MainActivityFragment extends Fragment {
         add("November");
         add("December");
     }};
+
     private final ArrayList<Integer> years = new ArrayList<Integer>() {{
-        for(int i = 2000; i < 2016; i++) {
+        int year = Calendar.getInstance().get(Calendar.YEAR);
+        for(int i = 2011; i <= year ; i++) {
             add(i);
         }
     }};
+
     private Force selectedForce;
     private String selectedMonth;
     private String selectedYear;
-
-    public MainActivityFragment() {
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -130,8 +120,8 @@ public class MainActivityFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
 
-                SimpleDateFormat formatIn = new SimpleDateFormat("MMMM");
-                SimpleDateFormat formatOut = new SimpleDateFormat("MM");
+                SimpleDateFormat formatIn = new SimpleDateFormat("MMMM", Locale.UK);
+                SimpleDateFormat formatOut = new SimpleDateFormat("MM", Locale.UK);
                 try {
                     selectedMonth = formatOut.format(formatIn.parse(monthAdapter.getItem(position)));
                 } catch (ParseException e) {

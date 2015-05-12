@@ -1,7 +1,6 @@
 package com.alacityfoundation.statistick;
 
 import android.app.Fragment;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,14 +12,9 @@ import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 
 
@@ -32,6 +26,7 @@ public class listActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         String url = this.getActivity().getIntent().getStringExtra("requestUrl");
+        Log.d("URL", url);
         new RequestTask().execute(url);
 
         return inflater.inflate(R.layout.fragment_list, container, false);
@@ -47,7 +42,6 @@ public class listActivityFragment extends Fragment {
                 result = new UrlDownloader().downloadUrl(urls[0]);
             } catch (IOException e) {
                 Log.d("OH DEAR", "Something went wrong");
-                e.printStackTrace();
             }
             return result;
         }
@@ -59,14 +53,16 @@ public class listActivityFragment extends Fragment {
                 // deserialise the json objects and add to the appropriate instance variable
                 JSONArray jsonResult = new JSONArray(result);
                 for(int i = 0; i < jsonResult.length(); i++) {
-                    // for all results in array, deserialise into returnObjectType objects
-                    Crime resultObject = this.decodeJson(Crime.class, jsonResult.getString(i));
-                    crimes.add(resultObject);
+                    // for all results in array, deserialise into crime objects
+                    JSONObject arrayObject = jsonResult.getJSONObject(i);
+                    Crime crime = new Crime();
+                    crime.setId(arrayObject.getString("persistent_id"));
+                    crimes.add(crime);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            // populate spinners with new ly deserialised objects
+            // populate list with newly deserialised objects
             populateList();
         }
 
@@ -78,6 +74,6 @@ public class listActivityFragment extends Fragment {
     }
 
     private void populateList() {
-        Log.d("CRIMES FOUND", this.crimes.get(0).toString());
+        Log.d("CRIMES FOUND", this.crimes.toString());
     }
 }
