@@ -29,6 +29,10 @@ class RequestTask extends AsyncTask<String, String, String> {
         this.returnObjectType = obj;
     }
 
+    public RequestTask() {
+        super();
+    }
+
     @Override
     protected String doInBackground(String... urls) {
         // params comes from the execute() call: params[0] is the url.
@@ -71,7 +75,7 @@ class RequestTask extends AsyncTask<String, String, String> {
         }
     }
 
-    public String readIt(InputStream stream) throws IOException, UnsupportedEncodingException {
+    private String readIt(InputStream stream) throws IOException, UnsupportedEncodingException {
         BufferedReader in = new BufferedReader(new InputStreamReader(stream));
         String line = null;
 
@@ -88,6 +92,5 @@ class RequestTask extends AsyncTask<String, String, String> {
         super.onPostExecute(result);
         // process results using registered listener method from the listener entity
         listener.onTaskCompleted(this.returnObjectType, result);
-        return;
     }
 }
