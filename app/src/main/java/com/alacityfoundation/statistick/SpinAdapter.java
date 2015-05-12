@@ -2,6 +2,9 @@ package com.alacityfoundation.statistick;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -36,6 +39,7 @@ public class SpinAdapter extends ArrayAdapter<Object> {
     public View getView(int position, View convertView, ViewGroup parent) {
         TextView label = new TextView(context);
         label.setTextColor(Color.BLACK);
+        label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
         label.setText(((Force) values[position]).getName());
 
         return label;
@@ -45,6 +49,7 @@ public class SpinAdapter extends ArrayAdapter<Object> {
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
         TextView label = new TextView(context);
         label.setTextColor(Color.BLACK);
+        label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
         label.setText(((Force) values[position]).getName());
 
         return label;
