@@ -10,8 +10,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -24,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -54,6 +57,7 @@ public class MainActivityFragment extends Fragment {
             add(i);
         }
     }};
+    private Force selectedForce = null;
 
     public MainActivityFragment() {
     }
@@ -69,14 +73,28 @@ public class MainActivityFragment extends Fragment {
 
     // called on button press
     public void getCrime(View view) {
-
+        
     }
 
     private void populateSpinners() {
         // loop through results and add to spinner
+        final SpinAdapter adapter = new SpinAdapter(this.getActivity(), android.R.layout.simple_spinner_item, forces.toArray());
         Spinner forceSpinner = (Spinner) this.getActivity().findViewById(R.id.forceSpinner);
-        ArrayAdapter<String> forceAdapter = new ArrayAdapter(this.getActivity().getBaseContext(), android.R.layout.simple_spinner_item, this.forces);
-        forceSpinner.setAdapter(forceAdapter);
+        forceSpinner.setAdapter(adapter); // Set the custom adapter to the spinner
+        // Handle the event when an item in the spinner is clicked
+        forceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+                // set the selectedForce to be the force chosen in the spinner
+                selectedForce = (Force) adapter.getItem(position);
+                Log.d("SELECTED FORCE", selectedForce.getName());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapter) {
+            }
+        });
 
         // populate month & year spinners
         Spinner yearSpinner = (Spinner) this.getActivity().findViewById(R.id.yearSpinner);
